@@ -115,7 +115,6 @@ public class AnthropicChatModel implements ChatModel {
         this.userId = builder.userId;
         this.customParameters = copy(builder.customParameters);
         this.strictTools = builder.strictTools;
-        this.supportedCapabilities = copy(builder.supportedCapabilities);
 
         ChatRequestParameters commonParameters;
         if (builder.defaultRequestParameters != null) {
@@ -137,6 +136,12 @@ public class AnthropicChatModel implements ChatModel {
                 .toolChoice(getOrDefault(builder.toolChoice, commonParameters.toolChoice()))
                 .responseFormat(getOrDefault(builder.responseFormat, commonParameters.responseFormat()))
                 .build();
+
+        Set<Capability> capabilities = new HashSet<>(copy(builder.supportedCapabilities));
+        if (InternalAnthropicCapabilities.supportsJsonSchemaResponseFormat(this.defaultRequestParameters.modelName())) {
+            capabilities.add(Capability.RESPONSE_FORMAT_JSON_SCHEMA);
+        }
+        this.supportedCapabilities = Set.copyOf(capabilities);
     }
 
     public static AnthropicChatModelBuilder builder() {
